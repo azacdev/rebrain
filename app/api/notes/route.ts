@@ -1,4 +1,3 @@
-import prisma from "@/lib/db";
 import { createNoteSchema } from "@/schemas";
 import { auth } from "@clerk/nextjs";
 
@@ -19,7 +18,7 @@ export async function POST(req: Request) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // const note = await 
+    // const note = await prisma
   } catch (error) {
     console.log(error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
