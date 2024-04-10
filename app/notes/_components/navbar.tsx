@@ -1,6 +1,6 @@
 "use client";
 
-import AddNoteDialog from "@/components/add-note-dialog";
+import AddNoteDialog from "@/components/add-edit-note-dialog";
 import { Button } from "@/components/ui/button";
 import { UserButton } from "@clerk/nextjs";
 import { Plus } from "lucide-react";
