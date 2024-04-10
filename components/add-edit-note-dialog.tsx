@@ -1,18 +1,16 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { TriangleAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Note } from "@prisma/client";
 
 import { CreateNoteSchema, createNoteSchema } from "@/schemas";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -27,27 +25,42 @@ import { Textarea } from "./ui/textarea";
 import LoadingButton from "./ui/loading-button";
 import { toast } from "sonner";
 
-interface AddNoteDialogProps {
+interface AddEditNoteDialogProps {
   open: boolean;
   setOpen: (open: boolean) => void;
+  noteToEdit?: Note;
 }
 
-const AddNoteDialog = ({ open, setOpen }: AddNoteDialogProps) => {
+const AddEditNoteDialog = ({
+  open,
+  setOpen,
+  noteToEdit,
+}: AddEditNoteDialogProps) => {
   const router = useRouter();
 
   const form = useForm<CreateNoteSchema>({
     resolver: zodResolver(createNoteSchema),
     defaultValues: {
-      title: "",
-      content: "",
+      title: noteToEdit?.title || "",
+      content: noteToEdit?.content || "",
     },
   });
 
   const onSubmit = async (data: CreateNoteSchema) => {
     try {
-      const response = await axios.post("/api/notes", data);
+      if (noteToEdit) {
+        const response = await axios.put("/api/notes", {
+          id: noteToEdit.id,
+          ...data,
+        });
 
-      console.log(response);
+        console.log(response);
+      } else {
+        const response = await axios.post("/api/notes", data);
+
+        console.log(response);
+      }
+
       form.reset();
       router.refresh();
     } catch (error) {
@@ -94,6 +107,9 @@ const AddNoteDialog = ({ open, setOpen }: AddNoteDialogProps) => {
               />
 
               <DialogFooter>
+                {/* {noteToEdit && (
+                  <LoadingButton loading={"coming"}>Delete note</LoadingButton>
+                )} */}
                 <LoadingButton
                   type="submit"
                   loading={form.formState.isSubmitting}
@@ -109,4 +125,4 @@ const AddNoteDialog = ({ open, setOpen }: AddNoteDialogProps) => {
   );
 };
 
-export default AddNoteDialog;
+export default AddEditNoteDialog;
