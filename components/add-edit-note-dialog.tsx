@@ -1,6 +1,7 @@
+import { useState } from "react";
+import axios from "axios";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
 import { useRouter } from "next/navigation";
 import { Note } from "@prisma/client";
 
@@ -37,6 +38,7 @@ const AddEditNoteDialog = ({
   noteToEdit,
 }: AddEditNoteDialogProps) => {
   const router = useRouter();
+  const [loading, setloading] = useState(false);
 
   const form = useForm<CreateNoteSchema>({
     resolver: zodResolver(createNoteSchema),
@@ -71,11 +73,34 @@ const AddEditNoteDialog = ({
     }
   };
 
+  const deleteNote = async () => {
+    if (!noteToEdit) return;
+    setloading(true);
+    try {
+      const response = await axios.delete("/api/notes", {
+        data: { id: noteToEdit.id },
+      });
+      console.log(response);
+      toast("Success", {
+        description: response.data.message,
+      });
+      form.reset();
+      router.refresh();
+    } catch (error) {
+      console.log(error);
+      toast("Error", {
+        description: "Something went wrong. please try again.",
+      });
+    } finally {
+      setloading(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add note</DialogTitle>
+          <DialogTitle>{noteToEdit ? "Edit note" : "Add note"}</DialogTitle>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
               <FormField
@@ -106,13 +131,22 @@ const AddEditNoteDialog = ({
                 )}
               />
 
-              <DialogFooter>
-                {/* {noteToEdit && (
-                  <LoadingButton loading={"coming"}>Delete note</LoadingButton>
-                )} */}
+              <DialogFooter className="gap-1 sm:gap-0">
+                {noteToEdit && (
+                  <LoadingButton
+                    loading={loading}
+                    variant={"destructive"}
+                    disabled={form.formState.isSubmitting}
+                    onClick={deleteNote}
+                    type="button"
+                  >
+                    Delete note
+                  </LoadingButton>
+                )}
                 <LoadingButton
                   type="submit"
                   loading={form.formState.isSubmitting}
+                  disabled={loading}
                 >
                   Submit
                 </LoadingButton>

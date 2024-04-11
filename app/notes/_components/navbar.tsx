@@ -1,14 +1,19 @@
 "use client";
 
-import AddNoteDialog from "@/components/add-edit-note-dialog";
-import { Button } from "@/components/ui/button";
-import { UserButton } from "@clerk/nextjs";
-import { Plus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { Plus } from "lucide-react";
+import { UserButton } from "@clerk/nextjs";
+import { dark } from "@clerk/themes";
+
+import AddNoteDialog from "@/components/add-edit-note-dialog";
+import { ModeToggle } from "@/components/mode-toggle";
+import { Button } from "@/components/ui/button";
+import { useTheme } from "next-themes";
 
 export default function NavBar() {
+  const { theme } = useTheme();
   const [open, setOpen] = useState(false);
 
   return (
@@ -22,9 +27,11 @@ export default function NavBar() {
             <UserButton
               afterSignOutUrl="/"
               appearance={{
+                baseTheme: theme === "dark" ? dark : undefined,
                 elements: { avatarBox: { width: "2.5rem", height: "2.5rem" } },
               }}
             />
+            <ModeToggle />
             <Button onClick={() => setOpen(true)}>
               <Plus size={20} className="mr-2" /> Add Note
             </Button>
