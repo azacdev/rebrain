@@ -80,12 +80,26 @@ export async function PUT(req: Request) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const updatedNote = await prisma.note.update({
-      where: { id },
-      data: {
-        title,
-        content,
-      },
+    const embedding = await getNoteEmbedding(title, content);
+
+    const updatedNote = await prisma.$transaction(async (tx) => {
+      const updatedNote = await tx.note.update({
+        where: { id },
+        data: {
+          title,
+          content,
+        },
+      });
+
+      await notesIndex.upsert([
+        {
+          id,
+          values: embedding,
+          metadata: { userId },
+        },
+      ]);
+
+      return updatedNote;
     });
 
     return Response.json({ updatedNote }, { status: 200 });
@@ -120,6 +134,12 @@ export async function DELETE(req: Request) {
     if (!userId || userId !== note.userId) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.note.delete({ where: { id } });
+
+      await notesIndex.deleteOne(id);
+    });
 
     await prisma.note.delete({
       where: { id },
