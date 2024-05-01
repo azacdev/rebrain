@@ -11,6 +11,7 @@ import AddNoteDialog from "@/components/add-edit-note-dialog";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
+import ChatButton from "@/components/chat-button";
 
 export default function NavBar() {
   const { theme } = useTheme();
@@ -35,6 +36,7 @@ export default function NavBar() {
             <Button onClick={() => setOpen(true)}>
               <Plus size={20} className="mr-2" /> Add Note
             </Button>
+            <ChatButton />
           </div>
         </div>
       </div>
