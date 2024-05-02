@@ -1,6 +1,6 @@
 import { useChat } from "ai/react";
 import { Message } from "ai";
-import { Bot, XCircle } from "lucide-react";
+import { Bot, Trash, XCircle } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 
 import { cn } from "@/lib/utils";
@@ -39,6 +39,8 @@ export default function ChatBox({ open, onClose }: ChatBoxProps) {
     }
   }, [open]);
 
+  const lastMessageIsUser = messages[messages.length - 1]?.role == "user";
+
   return (
     <div
       className={cn(
@@ -54,6 +56,24 @@ export default function ChatBox({ open, onClose }: ChatBoxProps) {
           {messages.map((message) => (
             <ChatMessage message={message} key={message.id} />
           ))}
+
+          {isLoading && lastMessageIsUser && (
+            <ChatMessage message={{ role: "assistant", content: "Thinking" }} />
+          )}
+          {error && (
+            <ChatMessage
+              message={{
+                role: "assistant",
+                content: "Something went wrong. Please try again",
+              }}
+            />
+          )}
+          {!error && messages.length == 0 && (
+            <div className="flex h-full items-center justify-center gap-3">
+              <Bot />
+              Ask the AI a question about your notes
+            </div>
+          )}
         </div>
         <form onSubmit={handleSubmit} className="m-3 flex gap-1">
           <Button
@@ -63,7 +83,9 @@ export default function ChatBox({ open, onClose }: ChatBoxProps) {
             className="shrink-0"
             type="button"
             onClick={() => setMessages([])}
-          ></Button>
+          >
+            <Trash />
+          </Button>
           <Input
             value={input}
             onChange={handleInputChange}
@@ -77,7 +99,11 @@ export default function ChatBox({ open, onClose }: ChatBoxProps) {
   );
 }
 
-function ChatMessage({ message: { role, content } }: { message: Message }) {
+function ChatMessage({
+  message: { role, content },
+}: {
+  message: Pick<Message, "role" | "content">;
+}) {
   const { user } = useUser();
 
   const isAIMessage = role === "assistant";
