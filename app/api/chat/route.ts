@@ -10,6 +10,9 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const messages: ChatCompletionMessage[] = body.messages;
+
+    console.log("Messages:", messages);
+    
     const truncatedMessages = messages.slice(-6);
 
     const embedding = await getEmbedding(
