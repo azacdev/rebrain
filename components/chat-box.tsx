@@ -38,7 +38,7 @@ export default function ChatBox({ open, onClose }: ChatBoxProps) {
       inputRef.current?.focus();
     }
   }, [open]);
-  
+
   return (
     <div
       className={cn(
@@ -56,6 +56,14 @@ export default function ChatBox({ open, onClose }: ChatBoxProps) {
           ))}
         </div>
         <form onSubmit={handleSubmit} className="m-3 flex gap-1">
+          <Button
+            title="Clear chat"
+            variant="outline"
+            size="icon"
+            className="shrink-0"
+            type="button"
+            onClick={() => setMessages([])}
+          ></Button>
           <Input
             value={input}
             onChange={handleInputChange}
